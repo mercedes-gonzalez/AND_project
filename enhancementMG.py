@@ -27,14 +27,14 @@ N = imgsize[1]
 # _________________________________________________________________________
 
 # --- Various Filtering  ---------------------------------------------------------------------------
-diam = 3 # Diameter of each pixel neighborhood that is used during filtering. If it is non-positive, it is computed from sigmaSpace .
-sigma_color = 1   # Filter sigma in the color space. A larger value of the parameter means that farther colors within the pixel 
+diam = 75 # Diameter of each pixel neighborhood that is used during filtering. If it is non-positive, it is computed from sigmaSpace .
+sigma_color = 75   # Filter sigma in the color space. A larger value of the parameter means that farther colors within the pixel 
                     # neighborhood (see sigmaSpace ) will be mixed together, resulting in larger areas of semi-equal color
-sigma_space = 100   # Filter sigma in the coordinate space. A larger value of the parameter means that farther pixels will influence 
+sigma_space = 75   # Filter sigma in the coordinate space. A larger value of the parameter means that farther pixels will influence 
                     # each other as long as their colors are close enough (see sigmaColor ). When d>0 , it specifies the neighborhood
                     #  size regardless of sigmaSpace . Otherwise, d is proportional to sigmaSpace 
 
-gaussian_blur = cv2.GaussianBlur(img,(9,9),0)
+gaussian_blur = cv2.GaussianBlur(img,(11,11),0)
 median_blur = cv2.medianBlur(img,3)
 bilateral_blur = cv2.bilateralFilter(img, diam, sigma_color, sigma_space)
 
@@ -49,17 +49,17 @@ bilateral_unsharp = cv2.addWeighted(bilateral_blur,alpha,img,beta,gamma)
 
 # --- Masking / Thresholding ---------------------------------------------------------------------------
 threshold_perc = .9 # pixel intensity threshold as percentage (quantiles)
-max_percent = .99 # set max value as this % of the max intensity 
-blocksize = 151 # bigger blocksize masks bigger blobs
-C = 13 # bigger C 
+max_percent = .90 # set max value as this % of the max intensity 
+blocksize = 211 # bigger blocksize masks bigger blobs
+C = 2 # bigger C 
 
-gaussian_mask = cv2.adaptiveThreshold(gaussian_unsharp,max_percent*np.max(gaussian_blur),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,blocksize,C)
+gaussian_mask = cv2.adaptiveThreshold(gaussian_blur,max_percent*np.max(gaussian_blur),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,blocksize,C)
 median_mask = cv2.adaptiveThreshold(median_blur,max_percent*np.max(gaussian_blur),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,blocksize,C)
 bilateral_mask = cv2.adaptiveThreshold(bilateral_blur,max_percent*np.max(gaussian_blur),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY_INV,blocksize,C)
 
 # --- Laplacian  ---------------------------------------------------------------------------
 ddepth = cv2.CV_32F
-ker = 111
+ker = 11
 gaussian_laplace = cv2.Laplacian(gaussian_blur,ddepth, ker)
 median_laplace = cv2.Laplacian(median_blur,ddepth, ker)
 bilateral_laplace = cv2.Laplacian(bilateral_blur,ddepth, ker)
@@ -69,7 +69,7 @@ gaussian_Contour, _ = cv2.findContours(gaussian_mask,cv2.RETR_EXTERNAL,cv2.CHAIN
 median_contour, _ = cv2.findContours(median_mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
 bilateral_contour, _ = cv2.findContours(bilateral_mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
 
-plotFilter = 2 # 0=gauss, 1=median, 2=bilateral
+plotFilter = 0 # 0=gauss, 1=median, 2=bilateral
 if plotFilter == 0:
     filtername = "Gaussian"
     filtered = gaussian_blur
@@ -111,7 +111,7 @@ for cnt in contourlist:
 
 # ___ PLOTTING ____________________________________________________________________________
 img_array = [ img, filtered, sharpened,contour, masked, laplacian]  
-title_array = [ 'Original', 'Filtered', 'Sharpened', 'Contour','Filtered Masked', 'Laplacian']
+title_array = [ 'Original', 'Filtered', 'Sharpened', 'Contour','Adaptive Threshold', 'Laplacian']
 
 fig, axs = plt.subplots(2,3)
 fig.suptitle(filtername, fontsize=20)
@@ -124,6 +124,18 @@ for i,ax in enumerate(axs):
     ax.set_title(title_str)
     ax.imshow(img_array[i],cmap='gray')
 plt.show()
+
+# # Something else to consider... built in denoising algorithms. May help with masking. but I don't want to do it today.
+# template=1
+# search=3
+# h=cv2.NORM_L2
+# blocksize=191
+# C=25
+# plt.figure()
+# denoised=cv2.fastNlMeansDenoising(img,template,search,h)
+# maskeddenoise= cv2.adaptiveThreshold(denoised,max_percent*np.max(denoised),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,blocksize,C)
+# plt.imshow(maskeddenoise,cmap='gray')
+# plt.show()
 
 # IGNORE ____________________________________________________________________________________________
 
