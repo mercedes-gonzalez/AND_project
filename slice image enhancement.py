@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 I = dip.imread(
     "C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_1.tiff")
+arrayI = np.asarray(I)
 I = dip.im_to_float(I)
 M, N = np.shape(I)
 # Idea 1: Binarize thresholding
@@ -43,7 +44,12 @@ def contrastStretch(image):
     return iO
 csImg = contrastStretch(C)
 # print(np.max(csImg),np.min(csImg))
-# print(csImg)
+# To the eye, there is not much difference in the images, quantitatively, there is minimal difference.
+# MSE = 0.0014015751637218763
+# print(np.sum(((csImg/255)-(C/255))**2)/(M*N))
+# plt.figure(3)
+# plt.hist(C.flatten(),256,[0,256],color='b')
+# plt.hist(csImg.flatten(),256,[0,256],color='r')
 
 # Idea 4: Intensity-level slicing
 D = I*255
@@ -65,13 +71,12 @@ for i in range(M):
 # Idea 5: Adaptive thresholding (matlab has an adaptive thresholding thing...could show version of it?
 
 # Idea 6: Histogram equalization
-E = I*255
+E = arrayI
 E = np.asarray(E)
 flat = E.flatten()
 # Find Cumulative distributive function (cdf)
 hist, bins = np.histogram(flat,256,[0,256])
 cdf = hist.cumsum()
-print(len(cdf))
 cdf_normalized = cdf * hist.max()/ cdf.max()
 
 cdf_num = (cdf - cdf.min()) * 255
@@ -79,21 +84,21 @@ cdf_den = cdf.max() - cdf.min()
 # re-normalize the cdf
 cdf_heq = cdf_num/cdf_den
 cdf_heq = cdf_heq.astype('uint8')
-print(len(cdf_heq))
 
 histEq = cdf_heq[flat]
-hist2, bins2 = np.histogram(histEq.flatten(),256,[0,256])
-cdf_norm_heq = cdf_heq * hist2.ma()/cdf_heq.max()
+hist2, bins2 = np.histogram(histEq,256,[0,256])
+cdf_norm_heq = cdf_heq * hist2.max()/cdf_heq.max()
+histEqImg = np.reshape(histEq,I.shape)
 
 # plt.figure(1)
 # plt.subplot(221)
-# plt.plot(cdf_normalized, color = 'b')
+# plt.plot(cdf, color = 'b')
 # plt.subplot(222)
 # plt.hist(E.flatten(),256,[0,256], color = 'r')
 # plt.xlim([0,256])
 # plt.legend(('cdf','histogram'), loc = 'upper left')
 # plt.subplot(223)
-# plt.plot(cdf_norm_heq, color='b')
+# plt.plot(cdf_heq, color='b')
 # plt.title('Histogram equalization')
 # plt.subplot(224)
 # plt.hist(histEq.flatten(),256,[0,256], color='r')
@@ -101,24 +106,24 @@ cdf_norm_heq = cdf_heq * hist2.ma()/cdf_heq.max()
 # plt.legend(('cdf','histogram'), loc = 'upper left')
 # plt.show()
 
-
 # Plot all seg/filter ideas together
 plt.figure(2)
 plt.subplot(231)
 plt.imshow(I,'gray')
 plt.title('Original image')
-plt.subplot(232)
-plt.imshow(A/255,'gray')
-plt.title('Binarize thresholding')
-plt.subplot(233)
-plt.title('Filtering')
+# plt.subplot(232)
+# plt.imshow(A/255,'gray')
+# plt.title('Binarize thresholding')
+# plt.subplot(233)
+# plt.title('Filtering')
 plt.subplot(234)
 plt.imshow(csImg/255, 'gray')
 plt.title('Contrast stretching')
-plt.subplot(235)
-plt.imshow(isImg/255,'gray')
-plt.title('Intensity-level slicing')
-plt.subplot(236)
-
+# plt.subplot(235)
+# plt.imshow(isImg/255,'gray')
+# plt.title('Intensity-level slicing')
+# plt.subplot(236)
+# plt.imshow(histEqImg,'gray')
+# plt.title('Histogram Equalization')
 plt.show()
 
