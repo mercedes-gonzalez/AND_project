@@ -58,7 +58,7 @@ isImg = np.zeros((M,N), dtype='uint8')
 
 # Specify the min and max range
 min_range = 141
-max_range = 147
+max_range = 146
 
 # Loop over the input image and if pixel value lies in desired range set it to 255 otherwise set it to 0.
 for i in range(M):
@@ -66,7 +66,7 @@ for i in range(M):
         if D[i,j] > min_range and D[i,j] < max_range:
             isImg[i,j] = 255
         else:
-            isImg[i,j] = D[i,j] # 'leave everything' or 0 if 'remove everything'
+            isImg[i,j] = 0#D[i,j] # 'leave everything' or 0 if 'remove everything'
 
 # Idea 5: Adaptive thresholding (matlab has an adaptive thresholding thing...could show version of it?
 
@@ -119,9 +119,9 @@ plt.title('Original image')
 plt.subplot(234)
 plt.imshow(csImg/255, 'gray')
 plt.title('Contrast stretching')
-# plt.subplot(235)
-# plt.imshow(isImg/255,'gray')
-# plt.title('Intensity-level slicing')
+plt.subplot(235)
+plt.imshow(isImg/255,'gray')
+plt.title('Intensity-level slicing')
 # plt.subplot(236)
 # plt.imshow(histEqImg,'gray')
 # plt.title('Histogram Equalization')
