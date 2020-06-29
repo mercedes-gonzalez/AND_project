@@ -1,1 +1,1 @@
-git clone https://github.com/tzutalin/labelImg.git
+https://github.com/mightenyip/labelImg
