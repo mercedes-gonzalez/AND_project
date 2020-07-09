@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Deep-Learning" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Transfer-Learning-in-keras---custom-data" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/XmlToTxt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/YOLO3-4-Py" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/annotation/labelImg" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/keras-yolo3" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pytorch/vision" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/yolov3" vcs="Git" />
+  </component>
+</project>
