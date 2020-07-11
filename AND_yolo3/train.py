@@ -12,12 +12,20 @@ from keras.callbacks import TensorBoard, ModelCheckpoint, ReduceLROnPlateau, Ear
 from yolo3.model import preprocess_true_boxes, yolo_body, tiny_yolo_body, yolo_loss
 from yolo3.utils import get_random_data
 
+lab_comp = True # set to true if running from lab computer/rig. otherwise set to false. 
 
 def _main():
-    annotation_path = 'C:/Users/might/Documents/GitHub/AND_Project/keras-yolo3/2020_train.txt'
-    log_dir = 'logs/000/'
-    classes_path = 'model_data/AND_classes.txt'
-    anchors_path = 'model_data/yolo_anchors.txt'
+    if lab_comp == True:
+        annotation_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/2020_train.txt'
+        log_dir = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/logs/000/'
+        classes_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/model_data/AND_classes.txt'
+        anchors_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/model_data/yolo_anchors.txt'
+    else: 
+        annotation_path = 'C:/Users/might/Documents/GitHub/AND_Project/keras-yolo3/2020_train.txt'
+        log_dir = 'logs/000/'
+        classes_path = 'model_data/AND_classes.txt'
+        anchors_path = 'model_data/yolo_anchors.txt'
+
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
     anchors = get_anchors(anchors_path)
@@ -51,7 +59,7 @@ def _main():
 
     # Train with frozen layers first, to get a stable loss.
     # Adjust num epochs to your dataset. This step is enough to obtain a not bad model.
-    if False:
+    if True:
         model.compile(optimizer=Adam(lr=1e-3), loss={
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
@@ -62,14 +70,14 @@ def _main():
                 steps_per_epoch=max(1, num_train//batch_size),
                 validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
-                epochs=50,
+                epochs=25,
                 initial_epoch=0,
                 callbacks=[logging, checkpoint])
         model.save_weights(log_dir + 'trained_weights_stage_1.h5')
 
     # Unfreeze and continue training, to fine-tune.
     # Train longer if the result is not good.
-    if True:
+    if False:
         for i in range(len(model.layers)):
             model.layers[i].trainable = True
         model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
@@ -81,8 +89,8 @@ def _main():
             steps_per_epoch=max(1, num_train//batch_size),
             validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
             validation_steps=max(1, num_val//batch_size),
-            epochs=100,
-            initial_epoch=50,
+            epochs=25,
+            initial_epoch=25,
             callbacks=[logging, checkpoint, reduce_lr, early_stopping])
         model.save_weights(log_dir + 'trained_weights_final.h5')
 
@@ -189,3 +197,4 @@ def data_generator_wrapper(annotation_lines, batch_size, input_shape, anchors, n
 
 if __name__ == '__main__':
     _main()
+    print('\nTraining complete\n')
