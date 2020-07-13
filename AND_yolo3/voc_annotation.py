@@ -35,12 +35,17 @@ for year, image_set in sets:
     else:
         image_ids = open('C:/Users/might/Documents/GitHub/AND_Project/AND_yolo3/model_data/train.txt').read().strip().split()
 
-    print(image_ids)
+    # print(image_ids)
     list_file = open('%s_%s.txt'%(year, image_set), 'w')
     for image_id in image_ids:
-        list_file.write('C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/training_data/neuron/%s.tiff'%(image_id))
+        if lab_comp == True:
+            list_file.write('C:/Users/myip7/AND_Project_MG/preprocessed_training_data/neuron/%s.tiff'%(image_id))
+        else:
+            list_file.write('C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/training_data/neuron/%s.tiff'%(image_id))
+
         # print(list_file)
         convert_annotation(image_id, list_file)
         list_file.write('\n')
+        
     list_file.close()
-
+    print('File saved.')
