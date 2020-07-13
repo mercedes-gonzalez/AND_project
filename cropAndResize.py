@@ -4,10 +4,14 @@ import cv2
 import pickle as pkl
 import numpy as np 
 import matplotlib.pyplot as plt
-from libs.pascal_voc_io import PascalVocReader
+from libs.pascal_voc_io import PascalVocReader,PascalVocWriter
 from libs.pascal_voc_io import XML_EXT
 import math
+from PIL import Image
+from os.path import join, isfile
+from os import listdir
 
+# FUNCTION DEFINITIONS _____________________________________________
 def loadPascalXMLByFilename(xmlPath):
     if xmlPath is None:
         return
@@ -18,7 +22,7 @@ def loadPascalXMLByFilename(xmlPath):
     return shapes
     
 def resizeAndCrop(raw,newSize,bboxes):
-    xsize,ysize,_ = raw.shape
+    xsize,ysize = raw.shape
     minDimension = min((xsize,ysize))
     width = minDimension
     height = minDimension
@@ -40,7 +44,6 @@ def resizeAndCrop(raw,newSize,bboxes):
     resized_L = cv2.resize(cropped_L,(newSize,newSize),interpolation=cv2.INTER_NEAREST)
 
     # Transform bounding boxes ------
-    
     # Transform x's
     left[:,0] = (newSize/minDimension)*old[:,0]
     left[:,2] = (newSize/minDimension)*old[:,2]
@@ -66,15 +69,86 @@ def resizeAndCrop(raw,newSize,bboxes):
 
     return resized_R, resized_L, left, right, old
 
-I = cv2.imread("C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_2.tiff")[:,:,::-1] #OpenCV uses BGR channels
-bboxes = loadPascalXMLByFilename("C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_2.xml")
-# print('bboxes = ',bboxes)
+def saveXML(img,filename, shapes, imagePath, lineColor=None, fillColor=None, databaseSrc=None):
+    imgFolderPath = os.path.dirname(imagePath)
+    imgFolderName = os.path.split(imgFolderPath)[-1]
+    imgFileName = os.path.basename(imagePath)
+    #imgFileNameWithoutExt = os.path.splitext(imgFileName)[0]
+    # Read from file path because self.imageData might be empty if saving to
+    # Pascal format
+    imgShape = img.shape
+    writer = PascalVocWriter(imgFolderName, imgFileName,imgShape, localImgPath=imagePath)
 
-newSize = 640 # side length of a square input image
-resized_R,resized_L,left,right,old = resizeAndCrop(raw=I,newSize=newSize,bboxes=bboxes)
+    for shape in shapes:
+        writer.addBndBox(int(shape[0]), int(shape[1]), int(shape[2]), int(shape[3]), 'neuron', False)
 
-fig,(ax1,ax2,ax3) = plt.subplots(1,3)
-ax1.imshow(draw_rect(I,old))
-ax2.imshow(draw_rect(resized_L,left))
-ax3.imshow(draw_rect(resized_R,right))
-plt.show()
+    writer.save(targetFile=filename)
+    # print('Successfully saved.\n')
+    return
+
+def histEqual(I):
+    # Preprocess left cropped images
+    E = np.asarray(I)
+    flat = E.flatten()
+
+    # Find Cumulative distributive function (cdf)
+    hist, bins = np.histogram(flat,256,[0,256])
+    cdf = hist.cumsum()
+    cdf_normalized = cdf * hist.max()/ cdf.max()
+
+    cdf_num = (cdf - cdf.min()) * 255
+    cdf_den = cdf.max() - cdf.min()
+    # re-normalize the cdf
+    cdf_heq = cdf_num/cdf_den
+    cdf_heq = cdf_heq.astype('uint8')
+
+    histEq = cdf_heq[flat]
+    hist2, bins2 = np.histogram(histEq,256,[0,256])
+    cdf_norm_heq = cdf_heq * hist2.max()/cdf_heq.max()
+    histEqImg = np.reshape(histEq,I.shape)
+
+    return histEqImg
+
+# Set path where all the images are, get list of all tiff files in that dir
+root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
+save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
+file_type = ".tiff"
+file_list = [f for f in listdir(root_path) if isfile(join(root_path, f)) & f.endswith(file_type)]
+newSize = 640 # side length of a square input image, 20x32
+
+# CROPPING
+for count, filename in enumerate(file_list):
+    # fullname = os.path.join(save_path,filename)
+    base = os.path.basename(filename)
+    fileID = os.path.splitext(base)[0]
+    xmlname = root_path + fileID + '.xml'
+
+    # Read file and load xml data
+    I = cv2.imread(join(root_path,filename),cv2.IMREAD_GRAYSCALE)
+    bboxes = loadPascalXMLByFilename(join(root_path,xmlname))
+
+    # Crop to square, resize to desired dims
+    resized_R,resized_L,leftbox,rightbox,oldbox = resizeAndCrop(raw=I,newSize=newSize,bboxes=bboxes)
+
+    # Transform right cropped images again because there will be duplicate cells
+    Rtransforms = Rotate(angle=90)
+    RImg, RFormat = Rtransforms(resized_R, rightbox)
+    RFilename = save_path + fileID + '_R.tiff'
+    RImage = Image.fromarray(RImg)
+    RImage.save(RFilename)
+
+    RXmlname = save_path + fileID + '_R.xml'
+    saveXML(img=RImg,filename=RXmlname, shapes=RFormat, imagePath=save_path)
+    LXmlname = save_path + fileID + '_L.xml'
+    saveXML(img=resized_L,filename=LXmlname, shapes=leftbox, imagePath=save_path)
+
+    # Show resizedcr/cropped images
+    fig,(ax1,ax2,ax3) = plt.subplots(1,3)
+    ax1.imshow(draw_rect(I,oldbox),cmap='gray')
+    ax2.imshow(draw_rect(resized_L,leftbox),cmap='gray')
+    ax3.imshow(draw_rect(RImg,RFormat),cmap='gray')
+    plt.show()
+
+    break
+
+
