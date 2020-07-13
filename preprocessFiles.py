@@ -18,17 +18,17 @@ import cv2
 from PIL import Image
 # ____ INITIALIZATION  ____________________________________________________
 # Set path where all the images are, get list of all tiff files in that dir
-root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/preprocessed_training_data/neuron/"
+root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/training_data/neuron/"
+save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/training_data/neuron/"
 file_type = ".tiff"
 file_list = [f for f in listdir(root_path) if isfile(join(root_path, f)) & f.endswith(file_type)]
+dim = (1280,1280)
 
 for count,filename in enumerate(file_list):
     I = cv2.imread(join(root_path,filename),cv2.IMREAD_GRAYSCALE)
-    arrayI = np.asarray(I)
-    I = dip.im_to_float(I)
 
-    E = arrayI
-    E = np.asarray(E)
+    resizedI = cv2.resize(I,dim,interpolation=cv2.INTER_AREA)
+    E = np.asarray(resizedI)
     flat = E.flatten()
     # Find Cumulative distributive function (cdf)
     hist, bins = np.histogram(flat,256,[0,256])
@@ -47,5 +47,7 @@ for count,filename in enumerate(file_list):
     histEqImg = np.reshape(histEq,I.shape)
 
     equalizedImage = Image.fromarray(histEqImg)
-    equalizedImage.save(filename)
-    print(count)
+    save_filename = join(save_path,filename)
+    # equalizedImage.save(save_filename)
+    plt.imshow(equalizedImage)
+    plt.show()
