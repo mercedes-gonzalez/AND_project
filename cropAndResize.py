@@ -110,8 +110,13 @@ def histEqual(I):
     return histEqImg
 
 # Set path where all the images are, get list of all tiff files in that dir
-root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
-save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
+lab_comp =True
+if lab_comp == True:
+    root_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/uncropped/"
+    save_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/croppedandresized/"
+else:
+    root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
+    save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
 file_type = ".tiff"
 file_list = [f for f in listdir(root_path) if isfile(join(root_path, f)) & f.endswith(file_type)]
 newSize = 640 # side length of a square input image, 20x32
@@ -136,6 +141,10 @@ for count, filename in enumerate(file_list):
     RFilename = save_path + fileID + '_R.tiff'
     RImage = Image.fromarray(RImg)
     RImage.save(RFilename)
+    
+    LFilename = save_path + fileID + '_L.tiff'
+    LImage = Image.fromarray(resized_L)
+    RImage.save(RFilename)
 
     RXmlname = save_path + fileID + '_R.xml'
     saveXML(img=RImg,filename=RXmlname, shapes=RFormat, imagePath=save_path)
@@ -143,12 +152,12 @@ for count, filename in enumerate(file_list):
     saveXML(img=resized_L,filename=LXmlname, shapes=leftbox, imagePath=save_path)
 
     # Show resizedcr/cropped images
-    fig,(ax1,ax2,ax3) = plt.subplots(1,3)
-    ax1.imshow(draw_rect(I,oldbox),cmap='gray')
-    ax2.imshow(draw_rect(resized_L,leftbox),cmap='gray')
-    ax3.imshow(draw_rect(RImg,RFormat),cmap='gray')
-    plt.show()
+    # fig,(ax1,ax2,ax3) = plt.subplots(1,3)
+    # ax1.imshow(draw_rect(I,oldbox),cmap='gray')
+    # ax2.imshow(draw_rect(resized_L,leftbox),cmap='gray')
+    # ax3.imshow(draw_rect(RImg,RFormat),cmap='gray')
+    # plt.show()
 
-    break
+    # break # use this for checking
 
 

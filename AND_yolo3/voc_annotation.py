@@ -10,7 +10,7 @@ lab_comp = True # Set to true if using lab computer/rig. Otherwwise set to false
 
 def convert_annotation(image_id, list_file):
     if lab_comp == True:
-        in_file = open('C:/Users/myip7/AND_Project_MG/preprocessed_training_data/neuron/%s.xml'%(image_id))
+        in_file = open('C:/Users/myip7/AND_Project_MG/preprocessed_training_data/croppedandresized/%s.xml'%(image_id))
     else: 
         in_file = open('C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/training_data/neuron/%s.xml'%(image_id))
 
@@ -39,11 +39,11 @@ for year, image_set in sets:
     list_file = open('%s_%s.txt'%(year, image_set), 'w')
     for image_id in image_ids:
         if lab_comp == True:
-            list_file.write('C:/Users/myip7/AND_Project_MG/preprocessed_training_data/neuron/%s.tiff'%(image_id))
+            list_file.write('C:/Users/myip7/AND_Project_MG/preprocessed_training_data/croppedandresized/%s.tiff'%(image_id))
         else:
             list_file.write('C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/training_data/neuron/%s.tiff'%(image_id))
 
-        # print(list_file)
+        print(image_id)
         convert_annotation(image_id, list_file)
         list_file.write('\n')
         
