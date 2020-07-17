@@ -18,7 +18,7 @@ def _main():
     # Load paths ---------------------------------
     if lab_comp == True:
         annotation_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/2020_train.txt'
-        log_dir = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/logs/000/'
+        log_dir = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/logs/001/'
         classes_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/model_data/AND_classes.txt'
         anchors_path = 'C:/Users/myip7/AND_Project_MG/AND_Project/AND_yolo3/model_data/yolo_anchors.txt'
     else: 
@@ -32,7 +32,7 @@ def _main():
     num_classes = len(class_names)
     anchors = get_anchors(anchors_path)
 
-    input_shape = (416,416) # multiple of 32, hw
+    input_shape = (640,640) # multiple of 32, hw
 
     is_tiny_version = len(anchors)==6 # default setting
     if is_tiny_version:
@@ -66,13 +66,13 @@ def _main():
             # use custom yolo_loss Lambda layer.
             'yolo_loss': lambda y_true, y_pred: y_pred})
 
-        batch_size = 32
+        batch_size = 8
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
                 steps_per_epoch=max(1, num_train//batch_size),
                 validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
-                epochs=50,
+                epochs=20,
                 initial_epoch=0,
                 callbacks=[logging, checkpoint])
         model.save_weights(log_dir + 'trained_weights_stage_1.h5')
@@ -85,14 +85,14 @@ def _main():
         model.compile(optimizer=Adam(lr=1e-4), loss={'yolo_loss': lambda y_true, y_pred: y_pred}) # recompile to apply the change
         print('Unfreeze all of the layers.')
 
-        batch_size = 32 # note that more GPU memory is required after unfreezing the body
+        batch_size = 8 # note that more GPU memory is required after unfreezing the body
         print('Train on {} samples, val on {} samples, with batch size {}.'.format(num_train, num_val, batch_size))
         model.fit_generator(data_generator_wrapper(lines[:num_train], batch_size, input_shape, anchors, num_classes),
             steps_per_epoch=max(1, num_train//batch_size),
             validation_data=data_generator_wrapper(lines[num_train:], batch_size, input_shape, anchors, num_classes),
             validation_steps=max(1, num_val//batch_size),
-            epochs=60,
-            initial_epoch=50,
+            epochs=40,
+            initial_epoch=20,
             callbacks=[logging, checkpoint, reduce_lr, early_stopping])
         model.save_weights(log_dir + 'trained_weights_final.h5')
 

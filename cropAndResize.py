@@ -66,7 +66,6 @@ def resizeAndCrop(raw,newSize,bboxes):
     # Transform y's
     right[:,1] = (newSize/minDimension)*(old[:,1])
     right[:,3] = (newSize/minDimension)*(old[:,3])
-
     return resized_R, resized_L, left, right, old
 
 def saveXML(img,filename, shapes, imagePath, lineColor=None, fillColor=None, databaseSrc=None):
@@ -77,8 +76,11 @@ def saveXML(img,filename, shapes, imagePath, lineColor=None, fillColor=None, dat
     # Read from file path because self.imageData might be empty if saving to
     # Pascal format
     imgShape = img.shape
-    writer = PascalVocWriter(imgFolderName, imgFileName,imgShape, localImgPath=imagePath)
+    writer = PascalVocWriter(foldername=imgFolderName, filename=imgFileName, imgSize=imgShape, localImgPath=imagePath)
 
+    # if shapes.size == 5:
+    #     writer.addBndBox(int(shapes[0]), int(shapes[1]), int(shapes[2]), int(shapes[3]), 'neuron', False)
+    # else:
     for shape in shapes:
         writer.addBndBox(int(shape[0]), int(shape[1]), int(shape[2]), int(shape[3]), 'neuron', False)
 
@@ -113,7 +115,7 @@ def histEqual(I):
 lab_comp =True
 if lab_comp == True:
     root_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/uncropped/"
-    save_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/croppedandresized/"
+    save_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/cropped_fixed_filename/"
 else:
     root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
     save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
@@ -137,20 +139,42 @@ for count, filename in enumerate(file_list):
 
     # Transform right cropped images again because there will be duplicate cells
     Rtransforms = Rotate(angle=90)
-    RImg, RFormat = Rtransforms(resized_R, rightbox)
-    RFilename = save_path + fileID + '_R.tiff'
-    RImage = Image.fromarray(RImg)
-    RImage.save(RFilename)
+
+
+    # only save image and xml if bboxes exist in the image
+    if rightbox.size != 0:
+        RImg, RFormat = Rtransforms(resized_R, rightbox)
+        # be sure no bboxes are outside the cropped image of right cropped
+        delete_index_R = np.zeros((RFormat.shape)).astype('bool')
+        for count, row in enumerate(RFormat):
+            if  not(0 <= row[0] <= newSize) or not(0 <= row[2] <= newSize):
+                delete_index_R[count,:] = 1
+            if  not(0 <= row[1] <= newSize) or not(0 <= row[3] <= newSize):
+                delete_index_R[count,:] = 1
+        NR = RFormat[~delete_index_R].size
+        rightfinal = RFormat[~delete_index_R].reshape((int(NR/5),5))
+        RFilename = save_path + fileID + '_R.tiff'
+        RImage = Image.fromarray(RImg)
+        RImage.save(RFilename)
+        RXmlname = save_path + fileID + '_R.xml'
+        saveXML(img=RImg,filename=RXmlname, shapes=rightfinal, imagePath=RFilename)
     
-    LFilename = save_path + fileID + '_L.tiff'
-    LImage = Image.fromarray(resized_L)
-    RImage.save(RFilename)
-
-    RXmlname = save_path + fileID + '_R.xml'
-    saveXML(img=RImg,filename=RXmlname, shapes=RFormat, imagePath=save_path)
-    LXmlname = save_path + fileID + '_L.xml'
-    saveXML(img=resized_L,filename=LXmlname, shapes=leftbox, imagePath=save_path)
-
+    if leftbox.size != 0:
+        # be sure no bboxes are outside the cropped image of left cropped
+        delete_index_L = np.zeros((leftbox.shape)).astype('bool')
+        for count, row in enumerate(leftbox):
+            if  not(0 <= row[0] <= newSize) or not(0 <= row[2] <= newSize):
+                delete_index_L[count,:] = 1
+            if  not(0 <= row[1] <= newSize) or not(0 <= row[3] <= newSize):
+                delete_index_L[count,:] = 1
+        NL = leftbox[~delete_index_L].size
+        leftfinal = leftbox[~delete_index_L].reshape((int(NL/5),5))
+        LFilename = save_path + fileID + '_L.tiff'
+        LImage = Image.fromarray(resized_L)
+        LImage.save(LFilename)
+        LXmlname = save_path + fileID + '_L.xml'
+        saveXML(img=resized_L,filename=LXmlname, shapes=leftfinal, imagePath=LFilename)
+        print('\n',count)
     # Show resizedcr/cropped images
     # fig,(ax1,ax2,ax3) = plt.subplots(1,3)
     # ax1.imshow(draw_rect(I,oldbox),cmap='gray')

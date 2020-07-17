@@ -158,9 +158,10 @@ def get_corners(bboxes):
         corner co-ordinates `x1 y1 x2 y2 x3 y3 x4 y4`      
         
     """
+
     width = (bboxes[:,2] - bboxes[:,0]).reshape(-1,1)
     height = (bboxes[:,3] - bboxes[:,1]).reshape(-1,1)
-    
+
     x1 = bboxes[:,0].reshape(-1,1)
     y1 = bboxes[:,1].reshape(-1,1)
     
@@ -174,7 +175,7 @@ def get_corners(bboxes):
     y4 = bboxes[:,3].reshape(-1,1)
     
     corners = np.hstack((x1,y1,x2,y2,x3,y3,x4,y4))
-    
+
     return corners
 
 def rotate_box(corners,angle,  cx, cy, h, w):
