@@ -5,30 +5,34 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-I = dip.imread(
-    "C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_1.tiff")
-arrayI = np.asarray(I)
-I = dip.im_to_float(I)
-M, N = np.shape(I)
+# I = dip.imread(
+#     "C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_1.tiff")
+img = cv2.imread("C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/subset_images/slice_3-14-2018_1.tiff",cv2.IMREAD_GRAYSCALE)
+imgsize = img.shape
+print(imgsize)
+M = imgsize[0]
+N = imgsize[1]
+print(img)
+# arrayI = np.asarray(img, dtype='uint8')
+# arrayI = np.asarray(I)
+# I = dip.im_to_float(I)
+# img = dip.im_to_float(img)
+# M, N = np.shape(I)
 # Idea 1: Binarize thresholding
-A = I*255
-# Specify a threshold 0-255
-threshold = 143
-# make all pixels < threshold black
-for m in range(0,M):
-    for n in range(0,N):
-        if A[m,n] > threshold:
-            A[m,n] = 1
-        else:
-            A[m,n] = 0
-
-# Idea 2: Filtering
-B = I*255
-# Mercedes filtering tingy
+# A = I*255
+# # Specify a threshold 0-255
+# threshold = 143
+# # make all pixels < threshold black
+# for m in range(0,M):
+#     for n in range(0,N):
+#         if A[m,n] > threshold:
+#             A[m,n] = 1
+#         else:
+#             A[m,n] = 0
 
 # Idea 3: Contrast stretching
-C = I*255
-contrast = dip.contrast(C)
+C = img #I*255
+# contrast = dip.contrast(C)
 # print(contrast)
 cmax = np.max(C) # cmax = 212
 cmin = np.min(C) # cmin = 51
@@ -36,13 +40,19 @@ cmin = np.min(C) # cmin = 51
 # Function to contrast stretch
 def contrastStretch(image):
     iI = image # image input
-    minI = 51   # minimum intensity (input)
-    maxI = 212  # maxmimum intensity (input)
+    bit = 1
+    minI = 51/bit   # minimum intensity (input)
+    maxI = 212/bit  # maxmimum intensity (input)
     minO = 0    # minimum intensity (output)
-    maxO = 255  # maxmimum intensity (output)
+    maxO = 255/bit  # maxmimum intensity (output)
     iO = (iI - minI) * (((maxO - minO) / (maxI - minI)) + minO) # image output
     return iO
-csImg = contrastStretch(C)
+conStretch_vec = np.vectorize(contrastStretch)
+# csImg = contrastStretch(C)
+csImg = conStretch_vec(C)
+csImg = np.asarray(csImg,dtype='uint8')
+print(csImg)
+print(csImg.shape)
 # print(np.max(csImg),np.min(csImg))
 # To the eye, there is not much difference in the images, quantitatively, there is minimal difference.
 # MSE = 0.0014015751637218763
@@ -50,6 +60,11 @@ csImg = contrastStretch(C)
 # plt.figure(3)
 # plt.hist(C.flatten(),256,[0,256],color='b')
 # plt.hist(csImg.flatten(),256,[0,256],color='r')
+
+median_blur = cv2.medianBlur(csImg,3)
+plt.figure(1)
+plt.imshow(median_blur,'gray')
+plt.show()
 
 # Idea 4: Intensity-level slicing
 D = I*255

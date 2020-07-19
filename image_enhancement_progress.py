@@ -18,7 +18,7 @@ import cv2
 # Set path where all the images are, get list of all tiff files in that dir
 # root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
 root_path = "C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/slice_images_raw/subset_images"
-file_type = ".tiff"
+file_type = ".png"
 file_list = [f for f in listdir(root_path) if isfile(join(root_path, f)) & f.endswith(file_type)]
 
 filename = file_list[0]
@@ -30,12 +30,14 @@ N = imgsize[1]
 # Merging code from "slice image enhancement.py"
 I = img
 arrayI = np.asarray(I)
+# print(img)
+# print(I)
 I = dip.im_to_float(I)
 # M, N = np.shape(I)
 # Idea 1: Binarize thresholding
-A = I*255
+A = img #*255
 # Specify a threshold 0-255
-threshold = 143
+threshold = 140
 # make all pixels < threshold black
 for m in range(0,M):
     for n in range(0,N):
@@ -44,27 +46,26 @@ for m in range(0,M):
         else:
             A[m,n] = 0
 
-# Idea 2: Filtering
-B = I*255
-# Mercedes filtering tingy
-
 # Idea 3: Contrast stretching
 C = I*255
-contrast = dip.contrast(C)
+# C = np.asarray(C)
+# contrast = dip.contrast(C)
 # print(contrast)
 cmax = np.max(C) # cmax = 212
 cmin = np.min(C) # cmin = 51
-# print(cmax,cmin)
+print(cmax,cmin)
 # Function to contrast stretch
 def contrastStretch(image):
     iI = image # image input
-    minI = 51   # minimum intensity (input)
+    minI = 51  # minimum intensity (input)
     maxI = 212  # maxmimum intensity (input)
     minO = 0    # minimum intensity (output)
     maxO = 255  # maxmimum intensity (output)
     iO = (iI - minI) * (((maxO - minO) / (maxI - minI)) + minO) # image output
     return iO
-csImg = contrastStretch(C)
+conStretch_vec = np.vectorize(contrastStretch)
+csImg = conStretch_vec(C)
+csImg = np.asarray(csImg,dtype='uint8')
 # print(np.max(csImg),np.min(csImg))
 # print(csImg)
 
@@ -112,17 +113,17 @@ histEqImg = np.reshape(histEq,I.shape)
 # plt.title('Original image')
 # plt.subplot(232)
 # plt.imshow(A/255,'gray')
-binarize = A/255
+binarize = A#/255
 # plt.title('Binarize thresholding')
 # plt.subplot(233)
 # plt.title('Filtering')
 # plt.subplot(234)
 # plt.imshow(csImg/255, 'gray')
-csImg = csImg/255
+csImg = csImg#/255
 # plt.title('Contrast stretching')
 # plt.subplot(235)
 # plt.imshow(isImg/255,'gray')
-isImg = isImg/255
+isImg = np.asarray(isImg,dtype='uint8')#/255
 # plt.title('Intensity-level slicing')
 # plt.subplot(236)
 # plt.imshow(histEqImg,'gray')
@@ -138,9 +139,9 @@ sigma_space = 75   # Filter sigma in the coordinate space. A larger value of the
                     # each other as long as their colors are close enough (see sigmaColor ). When d>0 , it specifies the neighborhood
                     #  size regardless of sigmaSpace . Otherwise, d is proportional to sigmaSpace 
 
-gaussian_blur = cv2.GaussianBlur(img,(11,11),0)
-median_blur = cv2.medianBlur(img,3)
-bilateral_blur = cv2.bilateralFilter(img, diam, sigma_color, sigma_space)
+gaussian_blur = cv2.GaussianBlur(histEqImg,(11,11),0)
+median_blur = cv2.medianBlur(histEqImg,3)
+bilateral_blur = cv2.bilateralFilter(histEqImg, diam, sigma_color, sigma_space)
 
 # --- Unsharp Algorithm  ---------------------------------------------------------------------------
 alpha = 2
@@ -214,7 +215,7 @@ for cnt in contourlist:
         # cv2.drawMarker(contour,(cx,cy),(color_num, color_num, color_num), cv2.MARKER_CROSS,10,1)
 
 # ___ PLOTTING ____________________________________________________________________________
-img_array = [ img, binarize, masked, csImg, isImg, histEqImg, sharpened, contour, laplacian]
+img_array = [I, binarize, masked, csImg, isImg, histEqImg, sharpened, contour, laplacian]
 title_array = [ 'Original', 'Binarize Threshold','Adaptive Threshold', 'Contrast Stretching', 'Intensity-level Slicing',
                 'Histogram Equalization', 'Sharpened', 'Contour', 'Laplacian']
 
@@ -242,6 +243,58 @@ plt.show()
 # maskeddenoise= cv2.adaptiveThreshold(denoised,max_percent*np.max(denoised),cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,blocksize,C)
 # plt.imshow(maskeddenoise,cmap='gray')
 # plt.show()
+
+# Save individual enhanced images
+# plt.figure(3)
+# plt.imshow(binarize, 'gray')
+# plt.savefig('binarize.png')
+# plt.figure(4)
+# plt.imshow(csImg,'gray')
+# plt.savefig('contrastStretch.png')
+# plt.figure(5)
+# plt.imshow(isImg,'gray')
+# plt.savefig('intensitySlice.png')
+# plt.figure(6)
+# plt.imshow(histEqImg,'gray')
+# plt.savefig('histEq.png')
+# plt.figure(7)
+# plt.imshow(gaussian_mask,'gray')
+# plt.savefig('gaussian_mask.png')
+# plt.figure(8)
+# plt.imshow(median_mask,'gray')
+# plt.savefig('median_mask.png')
+# plt.figure(9)
+# plt.imshow(bilateral_mask,'gray')
+# plt.savefig('bilateral_mask.png')
+
+# Build in Canny Edge Detection
+I = np.asarray(I,dtype='uint8')
+edge_original = cv2.Canny(I,51,151)
+edge_binarize = cv2.Canny(binarize,110,180)
+edge_csImg = cv2.Canny(csImg,60,200)
+edge_isImg = cv2.Canny(isImg,35,255)
+edge_histEqImg = cv2.Canny(histEqImg,130,200)
+edge_gauss_hist = cv2.Canny(gaussian_mask,100,200)
+edge_median_hist = cv2.Canny(median_mask,100,200)
+edge_bilat_hist = cv2.Canny(bilateral_mask,110,180)
+edge_unsharp = cv2.Canny(bilateral_unsharp,100,180)
+
+img_array = [edge_original, edge_binarize, edge_csImg, edge_isImg, edge_histEqImg, edge_gauss_hist, edge_median_hist, edge_bilat_hist, edge_unsharp]
+title_array = [ 'Original', 'Binarize Threshold','Contrast Stretching', 'Intensity-level Slicing',
+                'Histogram Equalization', 'HistEq+Gauss', 'HistEq+Median', 'HistEq+Bilateral', 'BilatSharpened']
+#plt.figure(4)
+fig, axs = plt.subplots(3,3)
+axs = axs.flatten()
+for i,ax in enumerate(axs):
+    title_str = title_array[i]
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title_str)
+    ax.imshow(img_array[i],cmap='gray')
+fig.tight_layout()
+fig.subplots_adjust(wspace=0,hspace=.2,top=0.90)
+plt.show()
+
 
 # IGNORE ____________________________________________________________________________________________
 
