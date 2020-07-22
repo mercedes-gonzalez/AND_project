@@ -20,7 +20,8 @@ from keras.utils import multi_gpu_model
 from skimage import color
 class YOLO(object):
     _defaults = {
-        "model_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/trained_weights_stage_1.h5',
+        # "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_cropped_aug/trained_weights_final.h5',
+        "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_histEq_augmented/trained_weights_final.h5',
         "anchors_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/yolo_anchors.txt',
         "classes_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/AND_classes.txt',
         "score" : 0.3, # was .3
@@ -99,9 +100,9 @@ class YOLO(object):
                 score_threshold=self.score, iou_threshold=self.iou)
         return boxes, scores, classes
 
-    def detect_image(self, image):
+    def detect_image(self, image,logPath):
         start = timer()
-
+        logFileObj = open(logPath,mode='w+')
         if self.model_image_size != (None, None):
             assert self.model_image_size[0]%32 == 0, 'Multiples of 32 required'
             assert self.model_image_size[1]%32 == 0, 'Multiples of 32 required'
@@ -113,7 +114,7 @@ class YOLO(object):
         image_data = np.array(boxed_image, dtype='float32')
         image = image.convert("RGB")
 
-        print(image_data.shape)
+        # print(image_data.shape)
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
@@ -125,7 +126,7 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
+        print('Found {} boxes for {}'.format(len(out_boxes), 'img'),file=logFileObj)
 
         font = ImageFont.truetype(font='C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
@@ -145,7 +146,7 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-            print(label, (left, top), (right, bottom))
+            print(label, (left, top), (right, bottom),file=logFileObj)
 
             if top - label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size[1]])
@@ -164,7 +165,8 @@ class YOLO(object):
             del draw
 
         end = timer()
-        print('Time to guess (s):',end - start)
+        print('Time to guess (s):',end - start,file=logFileObj)
+        logFileObj.close()
         return image
 
     def close_session(self):
