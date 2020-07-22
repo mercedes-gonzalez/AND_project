@@ -17,14 +17,14 @@ from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
 from yolo3.utils import letterbox_image
 import os
 from keras.utils import multi_gpu_model
-
+from skimage import color
 class YOLO(object):
     _defaults = {
-        "model_path": 'model_data/trained_weights_stage_1.h5',
-        "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/AND_classes.txt',
-        "score" : 0.3,
-        "iou" : 0.45,
+        "model_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/trained_weights_stage_1.h5',
+        "anchors_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/yolo_anchors.txt',
+        "classes_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/AND_classes.txt',
+        "score" : 0.3, # was .3
+        "iou" : 0.45, # was .45
         "model_image_size" : (416, 416),
         "gpu_num" : 1,
     }
@@ -111,6 +111,7 @@ class YOLO(object):
                               image.height - (image.height % 32))
             boxed_image = letterbox_image(image, new_image_size)
         image_data = np.array(boxed_image, dtype='float32')
+        image = image.convert("RGB")
 
         print(image_data.shape)
         image_data /= 255.
@@ -126,7 +127,7 @@ class YOLO(object):
 
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
-        font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+        font = ImageFont.truetype(font='C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
 
@@ -155,15 +156,15 @@ class YOLO(object):
             for i in range(thickness):
                 draw.rectangle(
                     [left + i, top + i, right - i, bottom - i],
-                    outline=(255))
+                    outline="red")
             draw.rectangle(
                 [tuple(text_origin), tuple(text_origin + label_size)],
-                fill=None)
+                fill="red")
             draw.text(text_origin, label, fill=(0), font=font)
             del draw
 
         end = timer()
-        print(end - start)
+        print('Time to guess (s):',end - start)
         return image
 
     def close_session(self):
