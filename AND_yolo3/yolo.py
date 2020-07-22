@@ -22,7 +22,7 @@ from skimage import color
 class YOLO(object):
     _defaults = {
         # if on mighten comp
-        "model_path": 'logs/004/trained_weights_final.h5', #logs/004 for histEqNet; logs/005 for untouchedNet
+        "model_path": 'logs/003/trained_weights_final.h5', #logs/004 for histEqNet; logs/005 for untouchedNet
         "anchors_path": 'logs/005/yolo_anchors.txt',
         "classes_path": 'model_data/AND_classes.txt',
         # if on mercedes comp
