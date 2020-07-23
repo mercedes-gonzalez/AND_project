@@ -50,7 +50,8 @@ if args.set_class_iou is not None:
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 GT_PATH = os.path.join(os.getcwd(), 'untouched_input', 'ground-truth')
-DR_PATH = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEq_aug1050/' #os.path.join(os.getcwd(), 'untouched_input', 'detection-results_uNet_uIm')
+DR_PATH = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/histEq_aug1050/' #os.path.join(os.getcwd(), 'untouched_input', 'detection-results_uNet_uIm')
+# ^make sure it is either histEq_input or untouched_input depending on your image input
 # if there are no images then no animation can be shown
 IMG_PATH = os.path.join(os.getcwd(), 'untouched_input', 'images-optional')
 if os.path.exists(IMG_PATH): 
@@ -341,11 +342,20 @@ def draw_plot_func(dictionary, n_classes, window_title, plot_title, x_label, out
 TEMP_FILES_PATH = ".temp_files"
 if not os.path.exists(TEMP_FILES_PATH): # if it doesn't exist already
     os.makedirs(TEMP_FILES_PATH)
-# output_files_path = "output/output-untouch_aug825-histEq_input" # CHANGE THE OUTPUT HERE FOR EACH NET/IM SET LATER
-# output_files_path = "output/output-histEq_aug825-histEq_input"
-# output_files_path = "output/output-histEq_825-histEq_input"
-# output_files_path = "output/output-histEq_1050-histEq_input"
-output_files_path = "output/output-histEq_aug1050-histEq_input"
+root_output_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/evaluation/'
+# HistEq INPUT
+# output_files_path = root_output_path + "output-untouch_aug825-histEq_input" # CHANGE THE OUTPUT HERE FOR EACH NET/IM SET LATER
+# output_files_path = root_output_path + "output-histEq_aug825-histEq_input"
+# output_files_path = root_output_path + "output-histEq_825-histEq_input"
+# output_files_path = root_output_path + "output-histEq_1050-histEq_input"
+# output_files_path = root_output_path + "output-histEq_aug1050-histEq_input"
+# Untouched INPUT
+# output_files_path = root_output_path + "output-untouch_aug825-untouch_input" # CHANGE THE OUTPUT HERE FOR EACH NET/IM SET LATER
+# output_files_path = root_output_path + "output-histEq_aug825-untouch_input"
+# output_files_path = root_output_path + "output-histEq_825-untouch_input"
+# output_files_path = root_output_path + "output-histEq_1050-untouch_input"
+output_files_path = root_output_path + "output-histEq_aug1050-untouch_input"
+
 
 if os.path.exists(output_files_path): # if it exist already
     # reset the output directory

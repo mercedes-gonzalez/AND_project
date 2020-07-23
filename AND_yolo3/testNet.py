@@ -25,12 +25,13 @@ def detect_img(yolo, imgPath, logName, timeLog):
 
 if mighten == True:
     # untouched Input
-    # root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/input_images/'
-    # save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/histEqNetmore_uIm_results/'
+    root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/input_images/'
+    save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/histEq_aug1050/'
+    save_time =  'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/inference/untouched_input/'
     # histEq Input
-    root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/input_images/'
-    save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEq_aug1050/'
-    save_time =  'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/inference/histEq_input/'
+    # root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/input_images/'
+    # save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEq_aug1050/'
+    # save_time =  'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/inference/histEq_input/'
 else:
     root_path = 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/histEq_input/'
     save_path = 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/histEq_input/histEq_trained_net_results/'
