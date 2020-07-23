@@ -18,20 +18,22 @@ from skimage import color
 
 class YOLO(object):
     _defaults = {
-        # "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_cropped_aug/trained_weights_final.h5',
-        "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_histEq_augmented/trained_weights_final.h5',
-        "anchors_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/yolo_anchors.txt',
-        "classes_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/AND_classes.txt',
         # if on mighten comp
-        "model_path": 'logs/003/trained_weights_final.h5', #logs/004 for histEqNet; logs/005 for untouchedNet
-        "anchors_path": 'logs/005/yolo_anchors.txt',
+        # "model_path": 'C:/Users/might\Dropbox (GaTech)/Shared folders/AND_Project/yolo_weights_005_untouch_aug825/trained_weights_final.h5',
+        # "model_path": 'C:/Users/might\Dropbox (GaTech)/Shared folders/AND_Project/yolo_weights_004_histeq_aug825/trained_weights_final.h5',
+        # "model_path": 'C:/Users/might\Dropbox (GaTech)/Shared folders/AND_Project/yolo_weights_002_histeq_825/trained_weights_final.h5',
+        # "model_path": 'C:/Users/might\Dropbox (GaTech)/Shared folders/AND_Project/yolo_weights_003_histeq_1050/trained_weights_final.h5',
+        "model_path": 'C:/Users/might\Dropbox (GaTech)/Shared folders/AND_Project/yolo_weights_006_histeq_aug1050/trained_weights_final.h5',
+        # weights number labeled to training set YOLOnet trained
+        "anchors_path": 'model_data/yolo_anchors.txt',
         "classes_path": 'model_data/AND_classes.txt',
         # if on mercedes comp
+        # "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_cropped_aug/trained_weights_final.h5',
         # "model_path": 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/yolo_weights_histEq_augmented/trained_weights_final.h5',
         # "anchors_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/yolo_anchors.txt',
         # "classes_path": 'C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/model_data/AND_classes.txt',
         "score" : 0.3, # was .3
-        "iou" : 0.45, # was .45
+        "iou" : 0.35, # was .45
         "model_image_size" : (416, 416),
         "gpu_num" : 1,
     }
@@ -97,7 +99,7 @@ class YOLO(object):
                 score_threshold=self.score, iou_threshold=self.iou)
         return boxes, scores, classes
 
-    def detect_image(self, image,logPath):
+    # def detect_image(self, image,logPath):
     def detect_image(self, image, logPath, timeLog):
         start = timer()
         logFileObj = open(logPath,mode='w+')
@@ -122,10 +124,10 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes for {}'.format(len(out_boxes), 'img'),file=logFileObj)
+        # print('Found {} boxes for {}'.format(len(out_boxes), 'img'),file=logFileObj)
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))#,file=logFileObj)
 
-        font = ImageFont.truetype(font='C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/font/FiraMono-Medium.otf',
+        # font = ImageFont.truetype(font='C:/Users/mgonzalez91/AND_repo/AND_Project-1/AND_yolo3/font/FiraMono-Medium.otf',
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
@@ -142,7 +144,7 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-            print(label, (left, top), (right, bottom),file=logFileObj)
+            # print(label, (left, top), (right, bottom),file=logFileObj)
             print(label, left, top, right, bottom, file=logFileObj)
 
             if top - label_size[1] >= 0:
@@ -161,8 +163,8 @@ class YOLO(object):
             del draw
 
         end = timer()
-        print('Time to guess (s):',end - start,file=logFileObj)
-        logFileTime = open(timeLog,mode='a')
+        # print('Time to guess (s):',end - start,file=logFileObj)
+        logFileTime = open(timeLog, mode='a')
         print(end - start, file=logFileTime)
         logFileTime.close()
         logFileObj.close()
@@ -170,6 +172,7 @@ class YOLO(object):
 
     def close_session(self):
         self.sess.close()
+
 def detect_video(yolo, video_path, output_path=""):
     import cv2
     vid = cv2.VideoCapture(video_path)

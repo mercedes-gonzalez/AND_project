@@ -6,8 +6,13 @@ import operator
 import sys
 import argparse
 import math
-
 import numpy as np
+
+"""
+Refer to line 345 to change your OUTPUT FOLDER
+Keep MINOVERLAP=0.5
+Leave GT-PATH and IMG-PATH as is. Change DR-PATH to your trainedNet results folder
+"""
 
 MINOVERLAP = 0.5 # default value (defined in the PASCAL VOC2012 challenge)
 
@@ -45,7 +50,7 @@ if args.set_class_iou is not None:
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 GT_PATH = os.path.join(os.getcwd(), 'untouched_input', 'ground-truth')
-DR_PATH = os.path.join(os.getcwd(), 'untouched_input', 'detection-results_uNet_uIm')
+DR_PATH = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEq_aug1050/' #os.path.join(os.getcwd(), 'untouched_input', 'detection-results_uNet_uIm')
 # if there are no images then no animation can be shown
 IMG_PATH = os.path.join(os.getcwd(), 'untouched_input', 'images-optional')
 if os.path.exists(IMG_PATH): 
@@ -336,7 +341,12 @@ def draw_plot_func(dictionary, n_classes, window_title, plot_title, x_label, out
 TEMP_FILES_PATH = ".temp_files"
 if not os.path.exists(TEMP_FILES_PATH): # if it doesn't exist already
     os.makedirs(TEMP_FILES_PATH)
-output_files_path = "output" # CHANGE THE OUTPUT HERE FOR EACH NET/IM SET LATER
+# output_files_path = "output/output-untouch_aug825-histEq_input" # CHANGE THE OUTPUT HERE FOR EACH NET/IM SET LATER
+# output_files_path = "output/output-histEq_aug825-histEq_input"
+# output_files_path = "output/output-histEq_825-histEq_input"
+# output_files_path = "output/output-histEq_1050-histEq_input"
+output_files_path = "output/output-histEq_aug1050-histEq_input"
+
 if os.path.exists(output_files_path): # if it exist already
     # reset the output directory
     shutil.rmtree(output_files_path)

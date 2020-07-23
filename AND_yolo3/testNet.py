@@ -1,5 +1,5 @@
 """
-    Script to test neural network without yolo_video.py
+    Script to test neural network inspired by yolo_video.py
 
     make sure that paths in yolo.py to model, classes, anchors, 
     and font are all absolute paths on your machine
@@ -25,12 +25,12 @@ def detect_img(yolo, imgPath, logName, timeLog):
 
 if mighten == True:
     # untouched Input
-    root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/'
-    save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/histEqNet_uIm_results/'
+    # root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/input_images/'
+    # save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/untouched_input/histEqNetmore_uIm_results/'
     # histEq Input
-    # root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/'
-    # save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEqNet_hIm_results/'
-
+    root_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/input_images/'
+    save_path = 'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/histEq_input/histEq_aug1050/'
+    save_time =  'C:/Users/might/Dropbox (GaTech)/Shared folders/AND_Project/testing_images/inference/histEq_input/'
 else:
     root_path = 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/histEq_input/'
     save_path = 'C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/histEq_input/histEq_trained_net_results/'
@@ -43,7 +43,8 @@ my_yolo = YOLO() # start yolo session
 for f in file_list:
     base = os.path.basename(f)
     logID = save_path + os.path.splitext(base)[0] + '.txt'
-    logTime = save_path + 'inference_time.txt'
+    net = os.path.dirname(save_path)
+    logTime = save_time + os.path.basename(net) + '_inference_time.txt'
     annotated = detect_img(my_yolo,imgPath=join(root_path,f),logName=logID,timeLog=logTime)
     annotated.save(join(save_path,f),"png")
 
