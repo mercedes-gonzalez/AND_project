@@ -72,20 +72,14 @@ def saveXML(img,filename, shapes, imagePath, lineColor=None, fillColor=None, dat
     imgFolderPath = os.path.dirname(imagePath)
     imgFolderName = os.path.split(imgFolderPath)[-1]
     imgFileName = os.path.basename(imagePath)
-    #imgFileNameWithoutExt = os.path.splitext(imgFileName)[0]
-    # Read from file path because self.imageData might be empty if saving to
-    # Pascal format
+
     imgShape = img.shape
     writer = PascalVocWriter(foldername=imgFolderName, filename=imgFileName, imgSize=imgShape, localImgPath=imagePath)
 
-    # if shapes.size == 5:
-    #     writer.addBndBox(int(shapes[0]), int(shapes[1]), int(shapes[2]), int(shapes[3]), 'neuron', False)
-    # else:
     for shape in shapes:
         writer.addBndBox(int(shape[0]), int(shape[1]), int(shape[2]), int(shape[3]), 'neuron', False)
 
     writer.save(targetFile=filename)
-    # print('Successfully saved.\n')
     return
 
 def histEqual(I):
@@ -112,16 +106,16 @@ def histEqual(I):
     return histEqImg
 
 # Set path where all the images are, get list of all tiff files in that dir
-lab_comp =True
+lab_comp =False
 if lab_comp == True:
     root_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/uncropped/"
     save_path = "C:/Users/myip7/AND_Project_MG/preprocessed_training_data/cropped_fixed_filename/"
 else:
-    root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
-    save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/slice_images_raw/subset_images/"
-file_type = ".tiff"
+    root_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/untouched/"
+    save_path = "C:/Users/mgonzalez91/Dropbox (GaTech)/Coursework/SU20 - Digital Image Processing/AND_Project/testing_images/cropped_only/"
+file_type = ".png"
 file_list = [f for f in listdir(root_path) if isfile(join(root_path, f)) & f.endswith(file_type)]
-newSize = 640 # side length of a square input image, 20x32
+newSize = 416 # side length of a square input image, 20x32
 
 # CROPPING
 for count, filename in enumerate(file_list):
@@ -138,26 +132,25 @@ for count, filename in enumerate(file_list):
     resized_R,resized_L,leftbox,rightbox,oldbox = resizeAndCrop(raw=I,newSize=newSize,bboxes=bboxes)
 
     # Transform right cropped images again because there will be duplicate cells
-    Rtransforms = Rotate(angle=90)
-
+    TF = Shear(shear_factor=.05)
 
     # only save image and xml if bboxes exist in the image
     if rightbox.size != 0:
-        RImg, RFormat = Rtransforms(resized_R, rightbox)
+        tf_I, tf_bboxes = TF(resized_R, rightbox)
         # be sure no bboxes are outside the cropped image of right cropped
-        delete_index_R = np.zeros((RFormat.shape)).astype('bool')
-        for count, row in enumerate(RFormat):
+        delete_index_R = np.zeros((tf_bboxes.shape)).astype('bool')
+        for count, row in enumerate(tf_bboxes):
             if  not(0 <= row[0] <= newSize) or not(0 <= row[2] <= newSize):
                 delete_index_R[count,:] = 1
             if  not(0 <= row[1] <= newSize) or not(0 <= row[3] <= newSize):
                 delete_index_R[count,:] = 1
-        NR = RFormat[~delete_index_R].size
-        rightfinal = RFormat[~delete_index_R].reshape((int(NR/5),5))
-        RFilename = save_path + fileID + '_R.tiff'
-        RImage = Image.fromarray(RImg)
+        NR = tf_bboxes[~delete_index_R].size
+        rightfinal = tf_bboxes[~delete_index_R].reshape((int(NR/5),5))
+        RFilename = save_path + fileID + '_R.png'
+        RImage = Image.fromarray(tf_I)
         RImage.save(RFilename)
         RXmlname = save_path + fileID + '_R.xml'
-        saveXML(img=RImg,filename=RXmlname, shapes=rightfinal, imagePath=RFilename)
+        saveXML(img=tf_I,filename=RXmlname, shapes=rightfinal, imagePath=RFilename)
     
     if leftbox.size != 0:
         # be sure no bboxes are outside the cropped image of left cropped
@@ -169,17 +162,17 @@ for count, filename in enumerate(file_list):
                 delete_index_L[count,:] = 1
         NL = leftbox[~delete_index_L].size
         leftfinal = leftbox[~delete_index_L].reshape((int(NL/5),5))
-        LFilename = save_path + fileID + '_L.tiff'
+        LFilename = save_path + fileID + '_L.png'
         LImage = Image.fromarray(resized_L)
         LImage.save(LFilename)
         LXmlname = save_path + fileID + '_L.xml'
         saveXML(img=resized_L,filename=LXmlname, shapes=leftfinal, imagePath=LFilename)
-        print('\n',count)
+    print('\n',count)
     # Show resizedcr/cropped images
     # fig,(ax1,ax2,ax3) = plt.subplots(1,3)
     # ax1.imshow(draw_rect(I,oldbox),cmap='gray')
     # ax2.imshow(draw_rect(resized_L,leftbox),cmap='gray')
-    # ax3.imshow(draw_rect(RImg,RFormat),cmap='gray')
+    # ax3.imshow(draw_rect(tf_I,tf_bboxes),cmap='gray')
     # plt.show()
 
     # break # use this for checking
