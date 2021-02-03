@@ -70,14 +70,16 @@ im1 = mmc.getImage()
 # print('----snap an image-----')
 min_range = 55 #30
 max_range = 80
-plt.figure(1)
-conStretch_vec = np.vectorize(contrastStretch)
-img = conStretch_vec(im1, min_range, max_range)
-plt.subplot(2,1,1)
-plt.imshow(im1,'gray')
-plt.subplot(2,1,2)
-plt.hist(img,10)
-plt.show()
+showFig = 0
+if showFig:
+    plt.figure(1)
+    conStretch_vec = np.vectorize(contrastStretch)
+    img = conStretch_vec(im1, min_range, max_range)
+    plt.subplot(2,1,1)
+    plt.imshow(im1,'gray')
+    plt.subplot(2,1,2)
+    plt.hist(img,10)
+    plt.show()
 
 # print('-----runnit-----')
 timeLog = save_path + date + '_test_inference_time.txt'
